@@ -2,46 +2,34 @@ import { StatusBar } from 'expo-status-bar';
 import React, {useState} from 'react';
 import { StyleSheet, Text, View, Button } from 'react-native';
 
-// 11강 PPT [Core Component] //
+// 12강 PPT [FlexBox] //
+/*
+export default function App() {
+    return (
+        <View style={ flexDirection: 'row'}>
+            <View style={{width: 100, height: 100, backgroundColor: 'red'}}></View>
+            <View style={{width: 100, height: 100, backgroundColor: 'darkorange'}}></View>
+            <View style={{width: 100, height: 100, backgroundColor: 'green'}}></View>
+            <View style={{width: 100, height: 100, backgroundColor: 'red'}}></View>
+            <View style={{width: 100, height: 100, backgroundColor: 'darkorange'}}></View>
+            <View style={{width: 100, height: 100, backgroundColor: 'green'}}></View>
+            <StatusBar style="auto" />
+        </View>
+    );
+}
+*/
 
 export default function App() {
-    const [number, setNumber] = useState(0);
-
     return (
-        <View style={styles.container}>
-            <Text style={styles.text}>결과: {number} </Text>
-            <View style={styles.btnGroup}>
-                <Button title="증가"
-                        disabled={true}
-                        color="pink"
-                        onPress={() => setNumber(number + 1)} />
-                <Button title="감소"
-                        onPress={() => setNumber(number - 1)} />
-            </View>
+        <View style={{ flex: 1 }}>
+            <View style={{flex: 1, backgroundColor: 'red'}}></View>
+            <View style={{flex: 1, backgroundColor: 'darkorange'}}></View>
+            <View style={{flex: 1, backgroundColor: 'green'}}></View>
+            <View style={{flex: 2, backgroundColor: 'red'}}></View>
             <StatusBar style="auto" />
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#fff',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    text: {
-        fontSize: 50,
-        fontWeight: 'bold',
-    },
-    btnGroup: {
-        flexDirection: 'row',
-        gap: 20,
-        borderWidth: 2,
-        borderColor: 'blue',
-    },
-    btn: {
-        width: 200,
-        height: 100,
-    }
 });
