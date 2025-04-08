@@ -1,18 +1,58 @@
 import { StatusBar } from 'expo-status-bar';
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
+import * as Location from 'expo-location';
 import { StyleSheet, Text, View, Button, ScrollView, Dimensions } from 'react-native';
 
 // const windowWidth = Dimensions.get('window').width;
-//const windowHeight = Dimensions.get('window').height;
+// const windowHeight = Dimensions.get('window').height;
 const {width: SCREEN_WIDTH} = Dimensions.get('window');
 const {height: SCREEN_HEIGHT} = Dimensions.get('window');
-console.log(SCREEN_WIDTH, SCREEN_HEIGHT);
+// console.log(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 export default function App() {
+    const [location, setLocation] = useState(null);
+    const [errorMsg, setErrorMsg] = useState(null);
+    const [permission, setPermission] = useState(true);
+    const [district, setDistrict] = useState(null);
+
+    const locationData = async () => {
+        const { granted } =
+            await Location.requestForegroundPermissionsAsync();
+        console.log(granted);
+
+        if (!granted) {
+            setPermission(false);
+            setErrorMsg('Permission to access location was denied');
+            return;
+        }
+
+        const {coords: {latitude, longitude}} =
+            await Location.getCurrentPositionAsync({accuracy: 5});
+        console.log(latitude);
+        console.log(longitude);
+
+        const address =
+            await Location.reverseGeocodeAsync({latitude, longitude});
+        console.log(address[0].district);
+        const districtAddress = address[0].district;
+        setDistrict(districtAddress);
+    }
+
+    useEffect(() => {
+        locationData()
+    }, []);
+
+    let text = 'Waiting...';
+    if (errorMsg) {
+        text = errorMsg;
+    } else if (location) {
+        text = JSON.stringify(location);
+    }
+
     return (
         <View style={styles.container}>
             <View style={styles.cityCon}>
-                <Text style={styles.city}>Seoul</Text>
+                <Text style={styles.city}>{district}</Text>
             </View>
             <View style={styles.regDateCon}>
                 <Text style={styles.regDate}>April 8, Tues., 5:00</Text>
@@ -64,7 +104,7 @@ export default function App() {
             </ScrollView>
             <StatusBar style="auto" />
         </View>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
@@ -125,3 +165,4 @@ const styles = StyleSheet.create({
         fontSize: 100,
     }
 })
+
