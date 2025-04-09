@@ -1,8 +1,11 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState, useEffect } from 'react';
 import * as Location from 'expo-location';
-import { StyleSheet, Text, View, Button, ScrollView, Dimensions } from 'react-native';
-import { GOOGLE_GEOCODING_API_KEY } from "@env";
+import { StyleSheet, Text, View, ActivityIndicator, ScrollView, Dimensions } from 'react-native';
+import { GOOGLE_GEOCODING_API_KEY, WEATHER_API_KEY } from "@env";
+
+const myAPIKey = GOOGLE_GEOCODING_API_KEY;
+const myAPIKey2 = WEATHER_API_KEY;
 
 // const windowWidth = Dimensions.get('window').width;
 // const windowHeight = Dimensions.get('window').height;
@@ -15,6 +18,8 @@ export default function App() {
     const [errorMsg, setErrorMsg] = useState(null);
     const [permission, setPermission] = useState(true);
     const [district, setDistrict] = useState(null);
+    const [dailyWeather, setDailyWeather] = useState([]);
+
 
     const locationData = async () => {
         const {granted} =
@@ -41,7 +46,6 @@ export default function App() {
         setDistrict(districtAddress);
          */
 
-        const myAPIKey = GOOGLE_GEOCODING_API_KEY;
         const apiURL =
             `https://maps.googleapis.com/maps/api/geocode/` +
             `json?latlng=${latitude},${longitude}&language=ko&key=${myAPIKey}`
@@ -56,8 +60,16 @@ export default function App() {
         const addressComponents = dataRs.address_components[0];
         const districtAddress = addressComponents.short_name;
         setDistrict(districtAddress);
-    }
 
+        const apiURL2 =
+            `https://api.openweathermap.org/data/3.0/onecall?` +
+            `lat=${latitude}&lon=${longitude}&exclude=alerts&appid=${myAPIKey2}` +
+            `&units=metric`;
+        const response2 = await fetch(apiURL2);
+        const weatherData = await response2.json();
+        //console.log(weatherData.daily);
+        setDailyWeather(weatherData.daily);
+    }
     useEffect(() => {
         locationData()
     }, []);
@@ -79,48 +91,29 @@ export default function App() {
             </View>
             <ScrollView pagingEnabled
                         horizontal={true}
-                        showsHorizontalScrollIndicator={false} // 숨김
+                        showsHorizontalScrollIndicator={false}
                         contentContainerStyle={styles.weathers}>
-                <View style={styles.weatherCon}>
-                    <View style={styles.day}>
-                        <Text style={styles.desc}>Sunny</Text>
+                {dailyWeather.length === 0? (
+                    <View style={{...styles.weatherCon, alignItems: 'center', justifyContent: 'center'}}>
+                        <ActivityIndicator size="large" color="#00ff00" />
                     </View>
-                    <View style={styles.tempCon}>
-                        <Text style={styles.temp}>13</Text>
-                    </View>
-                </View>
-                <View style={styles.weatherCon}>
-                    <View style={styles.day}>
-                        <Text style={styles.desc}>Sunny</Text>
-                    </View>
-                    <View style={styles.tempCon}>
-                        <Text style={styles.temp}>13</Text>
-                    </View>
-                </View>
-                <View style={styles.weatherCon}>
-                    <View style={styles.day}>
-                        <Text style={styles.desc}>Sunny</Text>
-                    </View>
-                    <View style={styles.tempCon}>
-                        <Text style={styles.temp}>13</Text>
-                    </View>
-                </View>
-                <View style={styles.weatherCon}>
-                    <View style={styles.day}>
-                        <Text style={styles.desc}>Sunny</Text>
-                    </View>
-                    <View style={styles.tempCon}>
-                        <Text style={styles.temp}>13</Text>
-                    </View>
-                </View>
-                <View style={styles.weatherCon}>
-                    <View style={styles.day}>
-                        <Text style={styles.desc}>Sunny</Text>
-                    </View>
-                    <View style={styles.tempCon}>
-                        <Text style={styles.temp}>13</Text>
-                    </View>
-                </View>
+                ): (
+                     dailyWeather.map((day, index) => (
+                        <View key={index} style={styles.weatherCon}>
+                            <View style={styles.day}>
+                                <Text style={styles.desc}>{day.weather[0].main}</Text>
+                            </View>
+                            <View style={styles.tempCon}>
+                                <Text style={styles.temp}>
+                                    {parseFloat(day.temp.day).toFixed(1)}
+                                </Text>
+                                <Text style={{
+                                    fontSize: 90, position: 'absolute',
+                                    top: 10, right: 30}}> ° </Text>
+                            </View>
+                        </View>
+                    ))
+                )}
             </ScrollView>
             <StatusBar style="auto" />
         </View>
@@ -147,7 +140,7 @@ const styles = StyleSheet.create({
         width: SCREEN_WIDTH,
     },
     day: {
-        flex: 0.2,
+        flex: 0.15,
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -182,7 +175,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     temp: {
-        fontSize: 100,
+        fontSize: 110,
     }
 })
 
