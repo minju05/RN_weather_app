@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import React, { useState, useEffect } from 'react';
 import * as Location from 'expo-location';
 import { StyleSheet, Text, View, Button, ScrollView, Dimensions } from 'react-native';
+import { GOOGLE_GEOCODING_API_KEY } from "@env";
 
 // const windowWidth = Dimensions.get('window').width;
 // const windowHeight = Dimensions.get('window').height;
@@ -16,9 +17,9 @@ export default function App() {
     const [district, setDistrict] = useState(null);
 
     const locationData = async () => {
-        const { granted } =
+        const {granted} =
             await Location.requestForegroundPermissionsAsync();
-        console.log(granted);
+        //console.log(granted);
 
         if (!granted) {
             setPermission(false);
@@ -28,13 +29,32 @@ export default function App() {
 
         const {coords: {latitude, longitude}} =
             await Location.getCurrentPositionAsync({accuracy: 5});
-        console.log(latitude);
-        console.log(longitude);
+        //console.log(latitude);
+        //console.log(longitude);
 
+        // Expo Location 으로 역 주소 검색
+        /*
         const address =
             await Location.reverseGeocodeAsync({latitude, longitude});
         console.log(address[0].district);
         const districtAddress = address[0].district;
+        setDistrict(districtAddress);
+         */
+
+        const myAPIKey = GOOGLE_GEOCODING_API_KEY;
+        const apiURL =
+            `https://maps.googleapis.com/maps/api/geocode/` +
+            `json?latlng=${latitude},${longitude}&language=ko&key=${myAPIKey}`
+
+        const response = await fetch(apiURL);
+        //console.log(response);
+        const data = await response.json();
+        //console.log(data);
+        //console.log(data.results[7].address_components)
+
+        const dataRs = data.results[7];
+        const addressComponents = dataRs.address_components[0];
+        const districtAddress = addressComponents.short_name;
         setDistrict(districtAddress);
     }
 
