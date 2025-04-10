@@ -7,9 +7,10 @@ import {
 import { GOOGLE_GEOCODING_API_KEY, WEATHER_API_KEY } from "@env";
 import { weatherDescKo } from './weatherDescKo';
 
+
 const myAPIKey = GOOGLE_GEOCODING_API_KEY;
 const myAPIKey2 = WEATHER_API_KEY;
-//import { Image } from 'react-native';
+
 const WeatherDesc = ({day}) => {  // 일별 날씨를 입력받으면
     const rs = weatherDescKo.find((item) => { // 한글 날씨에서
         const id = day.weather[0].id; // 압력받은 날씨의 id와
@@ -31,6 +32,48 @@ const WeatherDesc = ({day}) => {  // 일별 날씨를 입력받으면
     );
 };
 
+const useRegDate = () => {
+    const [currentDate, setCurrentDate] = useState(null);
+    const [weekDates, setWeekDates] = useState([]);
+
+    useEffect(() => {
+        const date = new Date();
+        //let year = date.getFullYear();
+        let month = date.getMonth() + 1;
+        let day = date.getDate();
+        let week = date.getDay();
+        let hour = date.getHours();
+        let minute = date.getMinutes();
+
+        //console.log(week); // 요일: 0(일)~6(토)
+        let weekDay = ['일', '월', '화', '수', '목', '금', '토']
+        const week1 = weekDay[week];
+
+        //console.log(hour); // 오후 > 12
+        const ampm = hour > 12 ? 'pm' : 'am';
+        hour = hour % 12 ? (hour % 12) : 12; // 1~11시
+        const hourString = hour < 10 ? `0${hour}` : hour;
+        const minuteString = minute < 10 ? `0${minute}` : minute;
+        // ex. 01시 05분
+
+        let formattedDate =
+            `${month}.${day}. (${week1}) ${hourString}:${minuteString} ${ampm}`;
+        //console.log(formattedDate);
+        setCurrentDate(formattedDate);
+
+        const weekDateString =
+            Array.from({ length: 8 }, // 오늘 포함 8일 저장
+                (_, index) => // 오늘로부터 index 일 떨어진 날의
+            {
+                const week2 = weekDay[(week + index) % 7];  // 요일과,
+                return `${day + index}일 (${week2})`; // 날짜 계산해서 반환
+            })
+        //console.log(weekDates);
+        setWeekDates(weekDateString); // 배열로 저장
+    }, [])
+
+    return [currentDate, weekDates];
+}
 
 // const windowWidth = Dimensions.get('window').width;
 // const windowHeight = Dimensions.get('window').height;
@@ -39,6 +82,8 @@ const {height: SCREEN_HEIGHT} = Dimensions.get('window');
 // console.log(SCREEN_WIDTH, SCREEN_HEIGHT);
 
 export default function App() {
+    const currentDate = useRegDate()[0];
+    const weekDates = useRegDate()[1];
     const [location, setLocation] = useState(null);
     const [errorMsg, setErrorMsg] = useState(null);
     const [permission, setPermission] = useState(true);
@@ -80,9 +125,8 @@ export default function App() {
         //console.log(data);
         //console.log(data.results[7].address_components)
 
-        const dataRs = data.results[7];
-        const addressComponents = dataRs.address_components[0];
-        const districtAddress = addressComponents.short_name;
+        const dataRs = data.results[7].address_components[0];
+        const districtAddress = dataRs.short_name;
         setDistrict(districtAddress);
 
         const apiURL2 =
@@ -111,7 +155,7 @@ export default function App() {
                 <Text style={styles.city}>{district}</Text>
             </View>
             <View style={styles.regDateCon}>
-                <Text style={styles.regDate}>4월 8일 (화) 5:00</Text>
+                <Text style={styles.regDate}>{currentDate}</Text>
             </View>
             <ScrollView pagingEnabled
                         horizontal={true}
@@ -131,9 +175,14 @@ export default function App() {
                                 <Text style={styles.temp}>
                                     {parseFloat(day.temp.day).toFixed(1)}
                                 </Text>
-                                <Text style={{
-                                    fontSize: 90, position: 'absolute',
-                                    top: 10, right: 30}}> ° </Text>
+                                <Text style={{fontSize: 90, position: 'absolute', top: 10, right: 30}}> ° </Text>
+                            </View>
+                            <View style={styles.detailCon}>
+                                <View style={styles.detailText}>
+                                    <Text style={styles.detailTitle}>Week Forecast</Text>
+                                    <Text style={styles.detailDate}>{weekDates[index]}</Text>
+                                </View>
+                                <View style={styles.detailBox}></View>
                             </View>
                         </View>
                     ))
@@ -151,7 +200,7 @@ const styles = StyleSheet.create({
     },
     cityCon: {
         //flex: 1,
-        height: SCREEN_HEIGHT * 0.25,
+        height: SCREEN_HEIGHT * 0.2,
     },
     regDateCon: {
         alignItems: 'center',
@@ -173,9 +222,17 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    detailCon: {
+        flex: 0.6,
+        marginHorizontal: 40, // 양 옆의 바깥쪽 여백
+    },
+    detailText: {
+        flexDirection: 'row',
+        marginTop: 30,
+    },
     city: {
         flex: 1,
-        marginTop: 40,
+        marginTop: 70,
         paddingTop: 10,
         fontSize: 30,
         textAlign: 'center',
@@ -206,6 +263,32 @@ const styles = StyleSheet.create({
     },
     temp: {
         fontSize: 110,
-    }
+    },
+    detailTitle: {
+        flex: 2,
+        backgroundColor: 'skyblue',
+        fontSize: 20,
+        fontWeight: 'bold',
+        paddingLeft: 10,
+        paddingBottom: 5,
+        borderBottomLeftRadius: 10,
+        borderTopLeftRadius: 10,
+    },
+    detailDate: {
+        flex: 1,
+        backgroundColor: 'white',
+        fontSize: 20,
+        fontWeight: 'bold',
+        textAlign: 'right',
+        paddingRight: 10,
+        paddingBottom: 5,
+        borderBottomRightRadius: 10,
+        borderTopRightRadius: 10,
+    },
+    detailBox: {
+        flex: 0.7,
+        borderRadius: 10,
+        marginTop: 10,
+    },
 })
 
