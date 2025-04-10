@@ -1,11 +1,36 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState, useEffect } from 'react';
 import * as Location from 'expo-location';
-import { StyleSheet, Text, View, ActivityIndicator, ScrollView, Dimensions } from 'react-native';
+import {
+    StyleSheet, Text, View, ActivityIndicator,
+    ScrollView, Dimensions, Image } from 'react-native';
 import { GOOGLE_GEOCODING_API_KEY, WEATHER_API_KEY } from "@env";
+import { weatherDescKo } from './weatherDescKo';
 
 const myAPIKey = GOOGLE_GEOCODING_API_KEY;
 const myAPIKey2 = WEATHER_API_KEY;
+//import { Image } from 'react-native';
+const WeatherDesc = ({day}) => {  // 일별 날씨를 입력받으면
+    const rs = weatherDescKo.find((item) => { // 한글 날씨에서
+        const id = day.weather[0].id; // 압력받은 날씨의 id와
+        return Object.keys(item)[0] == id; // 동일한 id를 지닌 한글 반환
+    });
+    const descRs = rs ? Object.values(rs)[0] : 'No data exists'; // 반환받지 못했을 때 대비
+    const iconId = day.weather[0].icon;
+    const iconURL = rs ? (
+        `https://openweathermap.org/img/wn/${iconId}@2x.png`)
+        : 'No data exists';
+
+    return (
+        <>
+            <Text style={styles.desc}>{descRs}</Text>
+            <Image style={styles.icon} // width, height 없으면 화면에 안 보임
+                   key={iconId} // Re-render 를 위해 구분
+                   source={{ uri: iconURL }} />
+        </>
+    );
+};
+
 
 // const windowWidth = Dimensions.get('window').width;
 // const windowHeight = Dimensions.get('window').height;
@@ -19,7 +44,6 @@ export default function App() {
     const [permission, setPermission] = useState(true);
     const [district, setDistrict] = useState(null);
     const [dailyWeather, setDailyWeather] = useState([]);
-
 
     const locationData = async () => {
         const {granted} =
@@ -87,7 +111,7 @@ export default function App() {
                 <Text style={styles.city}>{district}</Text>
             </View>
             <View style={styles.regDateCon}>
-                <Text style={styles.regDate}>April 8, Tues., 5:00</Text>
+                <Text style={styles.regDate}>4월 8일 (화) 5:00</Text>
             </View>
             <ScrollView pagingEnabled
                         horizontal={true}
@@ -98,10 +122,10 @@ export default function App() {
                         <ActivityIndicator size="large" color="#00ff00" />
                     </View>
                 ): (
-                     dailyWeather.map((day, index) => (
+                    dailyWeather.map((day, index) => (
                         <View key={index} style={styles.weatherCon}>
                             <View style={styles.day}>
-                                <Text style={styles.desc}>{day.weather[0].main}</Text>
+                                <WeatherDesc day={day} />
                             </View>
                             <View style={styles.tempCon}>
                                 <Text style={styles.temp}>
@@ -173,6 +197,12 @@ const styles = StyleSheet.create({
         marginTop: 10,
         fontSize: 20,
         fontWeight: 'bold',
+    },
+    icon: {
+      width: 60,
+      height: 60,
+      position: 'absolute',
+      bottom: -20,
     },
     temp: {
         fontSize: 110,
