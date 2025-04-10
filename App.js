@@ -1,6 +1,7 @@
 import { StatusBar } from 'expo-status-bar';
-import React, { useState, useEffect } from 'react';
 import * as Location from 'expo-location';
+import { Fontisto, Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import React, { useState, useEffect } from 'react';
 import {
     StyleSheet, Text, View, ActivityIndicator,
     ScrollView, Dimensions, Image } from 'react-native';
@@ -182,7 +183,29 @@ export default function App() {
                                     <Text style={styles.detailTitle}>Week Forecast</Text>
                                     <Text style={styles.detailDate}>{weekDates[index]}</Text>
                                 </View>
-                                <View style={styles.detailBox}></View>
+                                <View style={styles.detailBox}>
+                                    <View style={styles.detail}>
+                                        <Fontisto name="wind" size={37} color="black" />
+                                        <Text style={{fontSize: 25, marginTop: 15}}>
+                                            {parseFloat(day.wind_speed).toFixed(1)}
+                                        </Text>
+                                        <Text style={{fontSize: 15, marginTop: 5}}>풍속(m/s)</Text>
+                                    </View>
+                                    <View style={styles.detail}>
+                                        <Ionicons name="water-outline" size={40} color="black" />
+                                        <Text style={{fontSize: 25, marginTop: 12}}>
+                                            {parseFloat(day.pop*100).toFixed(1)}
+                                        </Text>
+                                        <Text style={{fontSize: 15, marginTop: 5}}>강수확률(%)</Text>
+                                    </View>
+                                    <View style={styles.detail}>
+                                        <MaterialCommunityIcons name="shield-sun-outline" size={45} color="black" />
+                                        <Text style={{fontSize: 25, marginTop: 7}}>
+                                            {parseFloat(day.uvi).toFixed(1)}
+                                        </Text>
+                                        <Text style={{fontSize: 15, marginTop: 5}}>UV지수(최대)</Text>
+                                    </View>
+                                </View>
                             </View>
                         </View>
                     ))
@@ -202,8 +225,27 @@ const styles = StyleSheet.create({
         //flex: 1,
         height: SCREEN_HEIGHT * 0.2,
     },
+    city: {
+        flex: 1,
+        marginTop: 70,
+        paddingTop: 10,
+        fontSize: 30,
+        textAlign: 'center',
+        fontWeight: 'bold',
+    },
     regDateCon: {
         alignItems: 'center',
+    },
+    regDate: {
+        paddingTop: 8,
+        paddingLeft: 18,
+        paddingRight: 18,
+        paddingBottom: 13,
+        backgroundColor: 'black',
+        color: 'white',
+        fontWeight: 'bold',
+        borderRadius: 20, // 둥근 모서리
+        overflow: 'hidden', // 오류 방지
     },
     weathers: {
         //backgroundColor: 'pink',
@@ -217,10 +259,25 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    desc: {
+        flex: 1.5,
+        marginTop: 10,
+        fontSize: 20,
+        fontWeight: 'bold',
+    },
+    icon: {
+        width: 60,
+        height: 60,
+        position: 'absolute',
+        bottom: -20,
+    },
     tempCon: {
         flex: 0.3,
         alignItems: 'center',
         justifyContent: 'center',
+    },
+    temp: {
+        fontSize: 110,
     },
     detailCon: {
         flex: 0.6,
@@ -230,55 +287,22 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         marginTop: 30,
     },
-    city: {
-        flex: 1,
-        marginTop: 70,
-        paddingTop: 10,
-        fontSize: 30,
-        textAlign: 'center',
-        fontWeight: 'bold',
-    },
-    regDate: {
-        paddingTop: 8,
-        paddingLeft: 18,
-        paddingRight: 18,
-        paddingBottom: 13,
-        backgroundColor: 'black',
-        color: 'white',
-        fontWeight: 'bold',
-        borderRadius: 20, // 둥근 모서리
-        overflow: 'hidden', // 오류 방지
-    },
-    desc: {
-        flex: 1.5,
-        marginTop: 10,
-        fontSize: 20,
-        fontWeight: 'bold',
-    },
-    icon: {
-      width: 60,
-      height: 60,
-      position: 'absolute',
-      bottom: -20,
-    },
-    temp: {
-        fontSize: 110,
-    },
     detailTitle: {
         flex: 2,
-        backgroundColor: 'skyblue',
-        fontSize: 20,
+        backgroundColor: 'dark orange',
+        fontSize: 18,
         fontWeight: 'bold',
         paddingLeft: 10,
+        paddingTop: 2,
         paddingBottom: 5,
         borderBottomLeftRadius: 10,
         borderTopLeftRadius: 10,
     },
     detailDate: {
         flex: 1,
-        backgroundColor: 'white',
-        fontSize: 20,
-        fontWeight: 'bold',
+        backgroundColor: 'black',
+        color: 'white',
+        fontSize: 18,
         textAlign: 'right',
         paddingRight: 10,
         paddingBottom: 5,
@@ -286,9 +310,19 @@ const styles = StyleSheet.create({
         borderTopRightRadius: 10,
     },
     detailBox: {
-        flex: 0.7,
-        borderRadius: 10,
+        flex: 0.6,
         marginTop: 10,
+        flexDirection: 'row',
+        justifyContent: 'center',
+    },
+    detail: {
+        width: "30%",
+        height: "100%",
+        borderBlockWidth: 1,
+        borderBlockColor: 'orange',
+        //borderRightColor: '',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 })
 
